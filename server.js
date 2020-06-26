@@ -21,12 +21,22 @@ const db = new sqlite3.Database('./db/election.db', err => {
 
 // Gets all the rows from the database.
 // -- response is called rows because each row is returned as an object
-// db.all(`SELECT * FROM candidates`, (err, rows) => {
-//     if(err){
-//         console.log(err);
-//     }
-//     console.log(rows);
-// });
+app.get('/api/candidates', (req,res) => {
+    const sql = `SELECT * FROM candidates`;
+    const params = [];
+    
+    db.all(sql, params, (err, rows) => {
+        if(err){
+            res.status(500).json({error: err.message});
+            return;
+        }
+        
+        res.json({
+            message: 'Success',
+            data: rows
+        });
+    });
+});
 
 // GET a single candidate
 // db.get(`SELECT * FROM candidates WHERE id=15`, (err, row)=>{
@@ -41,6 +51,7 @@ const db = new sqlite3.Database('./db/election.db', err => {
 // Question mark denotes a placeholder, making this a prepared statement
 // The next argument is a param, which is currently hardcoded as 1
 // -- param can be an array if we need multiple values
+// we are expecting to see undefined for the result argument because we are using the run method
 // db.run(`DELETE FROM candidates WHERE id = ?`, 1, function(err, result){
 //     if(err){
 //         console.log(err);
@@ -49,16 +60,17 @@ const db = new sqlite3.Database('./db/election.db', err => {
 // })
 
 // Create a candidate
-const sql = `INSERT INTO candidates (id, first_name, last_name, industry_connected)
-                VALUES(?,?,?,?)`;
-const params = [1, 'Ronald', 'Firbank', 1];
-//ES5 function, not arrow function, to use this
-db.run(sql, params, function(err, result) {
-    if (err) {
-        console.log(err);
-    }
-    console.log(result, this.lastID);
-});
+// const sql = `INSERT INTO candidates (id, first_name, last_name, industry_connected)
+//                 VALUES(?,?,?,?)`;
+// const params = [1, 'Ronald', 'Firbank', 1];
+// // ES5 function, not arrow function, to use this
+// // we are expecting to see undefined for the result argument because we are using the run method
+// db.run(sql, params, function(err, result) {
+//     if (err) {
+//         console.log(err);
+//     }
+//     console.log(result, this.lastID);
+// });
 
 // Default response for any other request (Not FOund) Catch all
 // -- needs to come after the routes
