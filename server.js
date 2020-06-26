@@ -1,4 +1,5 @@
 const express = require('express');
+const inputCheck = require('./utils/inputCheck');
 const PORT = process.env.PORT || 3001;
 // database
 // verbose turns on messages in the terminal regarding the state of the runtime
@@ -81,25 +82,38 @@ app.delete('/api/candidates/:id', (req, res)=>{
     });
 });
 
-// db.run(`DELETE FROM candidates WHERE id = ?`, 1, function(err, result){
-//     if(err){
-//         console.log(err);
-//     }
-//     console.log(result, this, this.changes);
-// })
 
 // Create a candidate
-// const sql = `INSERT INTO candidates (id, first_name, last_name, industry_connected)
-//                 VALUES(?,?,?,?)`;
-// const params = [1, 'Ronald', 'Firbank', 1];
-// // ES5 function, not arrow function, to use this
-// // we are expecting to see undefined for the result argument because we are using the run method
-// db.run(sql, params, function(err, result) {
-//     if (err) {
-//         console.log(err);
-//     }
-//     console.log(result, this.lastID);
-// });
+// ES5 function, not arrow function, to use this
+// we are expecting to see undefined for the result argument because we are using the run method
+app.post('/api/candidates', ({ body }, res)=>{
+    console.log("route for posting was hit")
+    // inputCheck is a function provided by the tutorial, or as they put it the "client"
+    const errors = inputCheck(body, 'first_name', 'last_name', 'industry_connected');
+    
+    if(errors){
+        res.status(400).json({error: errors});
+        return;
+    }
+    
+    const sql = `INSERT INTO candidates (first_name, last_name, industry_connected)
+    VALUES (?,?,?)`;
+    const params = [body.first_name, body.last_name, body.industry_connected];
+
+    db.run(sql, params, function(err, result){
+        if(err){
+            res.status(400).json({error: err.message})
+            return;
+        }
+
+        res.json({
+            message: 'Creation was succesful',
+            data: body,
+            id: this.lastID
+        })
+    })
+
+}) ;
 
 // Default response for any other request (Not FOund) Catch all
 // -- needs to come after the routes
