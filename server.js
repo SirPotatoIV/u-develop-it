@@ -40,14 +40,13 @@ app.get('/api/candidates', (req,res) => {
 });
 
 // GET a single candidate
-
 app.get('/api/candidates/:id', (req, res) => {
     const sql = `SELECT * FROM candidates WHERE id=?`;
     const params = [req.params.id];
     
     db.get(sql, params, (err, row)=> {
         if(err){
-            res.status(500).json({error: err.message});
+            res.status(400).json({error: err.message});
             return;
         }
 
@@ -58,13 +57,30 @@ app.get('/api/candidates/:id', (req, res) => {
     })
 })
 
-
 // DELETE a candidate
 // Run executes the SQL query, but does not retrieve any result data
 // Question mark denotes a placeholder, making this a prepared statement
 // The next argument is a param, which is currently hardcoded as 1
 // -- param can be an array if we need multiple values
 // we are expecting to see undefined for the result argument because we are using the run method
+
+app.delete('/api/candidates/:id', (req, res)=>{
+    const sql = `DELETE FROM candidates WHERE id=?`;
+    const params = [req.params.id];
+    
+    db.run(sql, params, function(err, result){
+        if(err){
+            res.status(400).json({error: err.message});
+            return;
+        }
+
+        res.json({
+            message: "Delete was succesful",
+            changes: this.changes
+        });
+    });
+});
+
 // db.run(`DELETE FROM candidates WHERE id = ?`, 1, function(err, result){
 //     if(err){
 //         console.log(err);
